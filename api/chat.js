@@ -1,5 +1,9 @@
 import OpenAI from "openai";
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
 export default async function handler(req, res) {
   // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -21,31 +25,23 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Empty message" });
     }
 
-    const client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
-    const systemPrompts = {
-      nya: "Ты милый кот-ассистент, говоришь с 'ня~', дружелюбный и тёплый.",
-      normal: "Ты умный, спокойный и полезный AI помощник.",
+    const modes = {
+      nya: "Ты милый аниме-ассистент, говоришь как няшка, добавляешь 'ня~', эмодзи 🐱",
+      normal: "Ты умный, спокойный и полезный ассистент.",
       philosopher: "Ты философ, рассуждаешь глубоко и вдумчиво.",
-      bestie: "Ты лучший друг, общаешься неформально и поддерживающе.",
-      study: "Ты строгий, но добрый учитель, помогаешь учиться.",
-      creative: "Ты креативный писатель и фантазёр."
+      bestie: "Ты лучший друг, немного дерзкий, поддерживающий 😏",
+      study: "Ты учитель, помогаешь с учебой, объясняешь просто.",
+      creative: "Ты креативный ассистент, любишь идеи, истории и воображение."
     };
 
-    const completion = await client.chat.completions.create({
+    const systemPrompt = modes[mode] || modes.normal;
+
+    const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        {
-          role: "system",
-          content: systemPrompts[mode] || systemPrompts.normal
-        },
-        {
-          role: "user",
-          content: message
-        }
-      ],
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message }
+      ]
     });
 
     res.status(200).json({
@@ -53,7 +49,7 @@ export default async function handler(req, res) {
     });
 
   } catch (err) {
-    console.error("CHAT ERROR:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 }
