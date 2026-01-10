@@ -51,9 +51,8 @@ export default async function handler(req, res) {
     return res.status(200).json({ reply });
   } catch (err) {
     console.error("CHAT ERROR:", err);
-    return res.status(500).json({
-      error: "AI error",
-      details: err.message,
+
+    return res.status(200).json({
+      reply: "😿 Я сломался… попробуй ещё раз чуть позже"
     });
   }
-}
